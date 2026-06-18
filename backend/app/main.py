@@ -27,9 +27,10 @@ app.include_router(shares.router, prefix=settings.API_V1_STR)
 app.include_router(ai.router, prefix=settings.API_V1_STR)
 
 
-
-
-
+@app.on_event("startup")
+def startup_event():
+    from app.services.storage_service import storage_service
+    storage_service.initialize_bucket()
 
 @app.get("/health", tags=["System"])
 async def health_check():
