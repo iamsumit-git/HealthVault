@@ -9,9 +9,9 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
   View,
 } from "react-native";
+import { showAlert } from "../../utils/alert";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -45,7 +45,7 @@ export default function UploadScreen() {
   const handleCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission Denied", "Camera permission is required to capture documents.");
+      showAlert("Permission Denied", "Camera permission is required to capture documents.");
       return;
     }
 
@@ -78,7 +78,7 @@ export default function UploadScreen() {
   const handleGallery = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission Denied", "Gallery permission is required to select files.");
+      showAlert("Permission Denied", "Gallery permission is required to select files.");
       return;
     }
 
@@ -128,24 +128,24 @@ export default function UploadScreen() {
       }
     } catch (err) {
       console.error(err);
-      Alert.alert("Error", "Failed to select document.");
+      showAlert("Error", "Failed to select document.");
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      Alert.alert("Error", "Please select a file or take a picture first.");
+      showAlert("Error", "Please select a file or take a picture first.");
       return;
     }
     if (!title.trim()) {
-      Alert.alert("Error", "Please enter a title for the document.");
+      showAlert("Error", "Please enter a title for the document.");
       return;
     }
 
     // Validate date format YYYY-MM-DD
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (docDate && !dateRegex.test(docDate)) {
-      Alert.alert("Error", "Please enter date in YYYY-MM-DD format.");
+      showAlert("Error", "Please enter date in YYYY-MM-DD format.");
       return;
     }
 
@@ -161,7 +161,7 @@ export default function UploadScreen() {
         document_date: docDate || undefined,
       });
 
-      Alert.alert("Success", "Medical record uploaded and scheduled for AI indexing! 🎉", [
+      showAlert("Success", "Medical record uploaded and scheduled for AI indexing! 🎉", [
         {
           text: "OK",
           onPress: () => {
@@ -175,7 +175,7 @@ export default function UploadScreen() {
       ]);
     } catch (err: any) {
       const errMsg = err.response?.data?.detail || "Upload failed. Please try again.";
-      Alert.alert("Failed", errMsg);
+      showAlert("Failed", errMsg);
     } finally {
       setLoading(false);
     }

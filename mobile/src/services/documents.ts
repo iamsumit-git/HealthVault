@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { api } from "./api";
 import { MedicalDocument, DocumentType } from "../types";
 
@@ -16,14 +17,20 @@ export const documentService = {
   }): Promise<MedicalDocument> => {
     const formData = new FormData();
     
-    // Construct standard React Native file item
-    const fileItem = {
-      uri: payload.uri,
-      name: payload.name,
-      type: payload.type,
-    } as any;
-    
-    formData.append("file", fileItem);
+    if (Platform.OS === "web") {
+      // On web, retrieve the file as a Blob before appending to FormData
+      const response = await fetch(payload.uri);
+      const blob = await response.blob();
+      formData.append("file", blob, payload.name);
+    } else {
+      // Construct standard React Native file item
+      const fileItem = {
+        uri: payload.uri,
+        name: payload.name,
+        type: payload.type,
+      } as any;
+      formData.append("file", fileItem);
+    }
     formData.append("title", payload.title);
     formData.append("document_type", payload.document_type);
     
