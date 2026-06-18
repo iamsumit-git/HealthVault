@@ -2,7 +2,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 import uuid
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -69,7 +69,11 @@ async def create_share_link(
 
 
 @router.get("/view/{token}", response_model=List[MedicalDocumentOut], status_code=status.HTTP_200_OK)
-async def view_shared_documents(token: str, db: AsyncSession = Depends(get_db)):
+async def view_shared_documents(
+    token: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
     """
     Public endpoint for doctors/family members to view shared documents.
     Validates token validity and expiration, returning presigned download links.
@@ -103,7 +107,7 @@ async def view_shared_documents(token: str, db: AsyncSession = Depends(get_db)):
     for item in db_share.share_items:
         doc = item.document
         schema_out = MedicalDocumentOut.model_validate(doc)
-        schema_out.pre_signed_url = storage_service.get_presigned_url(doc.file_url)
+        schema_out.pre_signed_url = storage_service.get_presigned_url(doc.file_url, client_host=request.headers.get("host"))
         shared_docs.append(schema_out)
 
     return shared_docs

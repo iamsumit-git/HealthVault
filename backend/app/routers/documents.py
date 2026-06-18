@@ -1,7 +1,7 @@
 import uuid
 from datetime import date
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db, AsyncSessionLocal
@@ -113,6 +113,7 @@ async def process_document_pipeline(document_id: uuid.UUID, user_id: uuid.UUID):
 
 @router.post("/upload", response_model=MedicalDocumentOut, status_code=status.HTTP_201_CREATED)
 async def upload_document(
+    request: Request,
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     title: str = Form(...),
@@ -179,7 +180,7 @@ async def upload_document(
     db_doc = await document_repository.create(db, obj_in=doc_in)
 
     # Generate pre-signed url for instant loading in mobile app
-    pre_signed_url = storage_service.get_presigned_url(db_doc.file_url)
+    pre_signed_url = storage_service.get_presigned_url(db_doc.file_url, client_host=request.headers.get("host"))
 
     # Convert to schema outcome with pre-signed url hook
     result = MedicalDocumentOut.model_validate(db_doc)
@@ -193,6 +194,7 @@ async def upload_document(
 
 @router.get("/", response_model=List[MedicalDocumentOut], status_code=status.HTTP_200_OK)
 async def list_documents(
+    request: Request,
     document_type: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -208,7 +210,7 @@ async def list_documents(
     result_list = []
     for doc in docs:
         schema_out = MedicalDocumentOut.model_validate(doc)
-        schema_out.pre_signed_url = storage_service.get_presigned_url(doc.file_url)
+        schema_out.pre_signed_url = storage_service.get_presigned_url(doc.file_url, client_host=request.headers.get("host"))
         result_list.append(schema_out)
 
     return result_list
@@ -217,6 +219,7 @@ async def list_documents(
 @router.get("/{id}", response_model=MedicalDocumentOut, status_code=status.HTTP_200_OK)
 async def get_document(
     id: uuid.UUID,
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -231,7 +234,7 @@ async def get_document(
         )
 
     schema_out = MedicalDocumentOut.model_validate(doc)
-    schema_out.pre_signed_url = storage_service.get_presigned_url(doc.file_url)
+    schema_out.pre_signed_url = storage_service.get_presigned_url(doc.file_url, client_host=request.headers.get("host"))
     return schema_out
 
 

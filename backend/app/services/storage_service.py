@@ -67,24 +67,35 @@ class StorageService:
             return None
 
     def get_presigned_url(
-        self, file_name: str, expires_in_seconds: int = 3600
+        self, file_name: str, expires_in_seconds: int = 3600, client_host: Optional[str] = None
     ) -> Optional[str]:
         """
         Generate a secure pre-signed download URL for a file.
-        Adjusts internal container endpoints to local host address for client access.
+        Uses the client-visible host (e.g. localhost or physical IP) to sign the URL correctly.
         """
         try:
-            url = self.s3_client.generate_presigned_url(
+            # Determine client-visible endpoint port 9000
+            if client_host:
+                # If host includes port, split it
+                host_only = client_host.split(":")[0]
+                endpoint = f"http://{host_only}:9000"
+            else:
+                endpoint = "http://localhost:9000"
+
+            client = boto3.client(
+                "s3",
+                endpoint_url=endpoint,
+                aws_access_key_id=settings.MINIO_ACCESS_KEY,
+                aws_secret_access_key=settings.MINIO_SECRET_KEY,
+                config=Config(signature_version="s3v4"),
+                region_name="us-east-1",
+            )
+
+            url = client.generate_presigned_url(
                 "get_object",
                 Params={"Bucket": self.bucket_name, "Key": file_name},
                 ExpiresIn=expires_in_seconds,
             )
-            # If the backend is running inside docker, the url generated uses 'http://minio:9000/...'
-            # Clients (host browsers/apps) cannot resolve 'minio:9000'.
-            # We rewrite 'minio:9000' to 'localhost:9000' for host accessibility.
-            if "minio:9000" in url:
-                url = url.replace("minio:9000", "localhost:9000")
-
             return url
         except Exception as e:
             logger.error(f"Failed to generate presigned URL for '{file_name}': {e}")
