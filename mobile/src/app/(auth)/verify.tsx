@@ -8,8 +8,8 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
 } from "react-native";
+import { showAlert } from "../../utils/alert";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
@@ -36,7 +36,7 @@ export default function VerifyScreen() {
 
   const handleVerifyOtp = async () => {
     if (otpCode.length !== 6) {
-      Alert.alert("Invalid Code", "Please enter a 6-digit verification code.");
+      showAlert("Invalid Code", "Please enter a 6-digit verification code.");
       return;
     }
 
@@ -63,7 +63,7 @@ export default function VerifyScreen() {
     } catch (err: any) {
       const errMsg =
         err.response?.data?.detail || "Invalid code. Please verify and try again.";
-      Alert.alert("Verification Failed", errMsg);
+      showAlert("Verification Failed", errMsg);
     } finally {
       setLoading(false);
     }
@@ -79,9 +79,9 @@ export default function VerifyScreen() {
         ? `\n\n(Dev Sandbox Mock Code: ${res.otp_code})`
         : "";
 
-      Alert.alert("Code Sent", `A new verification code has been sent.${developerHint}`);
+      showAlert("Code Sent", `A new verification code has been sent.${developerHint}`);
     } catch (err: any) {
-      Alert.alert("Failed", "Unable to resend OTP at this time.");
+      showAlert("Failed", "Unable to resend OTP at this time.");
     }
   };
 
@@ -90,7 +90,7 @@ export default function VerifyScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} disabled={Platform.OS === 'web'}>
         <ThemedView style={styles.container}>
           <SafeAreaView style={styles.content}>
             <ThemedView style={styles.header}>

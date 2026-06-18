@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
+import { ThemeProvider, DarkTheme, DefaultTheme } from 'expo-router/react-navigation';
 import { useAuthStore } from '../state/useAuthStore';
 
 export default function RootLayout() {

@@ -8,8 +8,8 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
 } from "react-native";
+import { showAlert } from "../../utils/alert";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
@@ -31,7 +31,7 @@ export default function LoginScreen() {
 
   const handleSendOtp = async () => {
     if (!inputVal.trim()) {
-      Alert.alert("Error", "Please enter an email address or phone number.");
+      showAlert("Error", "Please enter an email address or phone number.");
       return;
     }
 
@@ -48,7 +48,7 @@ export default function LoginScreen() {
         ? `\n\n(Dev Sandbox Mock Code: ${res.otp_code})`
         : "";
 
-      Alert.alert(
+      showAlert(
         "Verification Code Sent",
         `A 6-digit code has been sent to your ${isEmail ? "email" : "phone"}.${developerHint}`,
         [
@@ -69,7 +69,7 @@ export default function LoginScreen() {
       );
     } catch (err: any) {
       const errMsg = err.response?.data?.detail || "Something went wrong. Please try again.";
-      Alert.alert("Failed", errMsg);
+      showAlert("Failed", errMsg);
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} disabled={Platform.OS === 'web'}>
         <ThemedView style={styles.container}>
           <SafeAreaView style={styles.content}>
             {/* Brand Logo & Header */}

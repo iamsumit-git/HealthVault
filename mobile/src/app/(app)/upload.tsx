@@ -186,7 +186,7 @@ export default function UploadScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} disabled={Platform.OS === 'web'}>
         <ThemedView style={styles.container}>
           <ScrollView
             contentContainerStyle={styles.scrollContent}
