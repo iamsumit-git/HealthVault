@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, ActivityIndicator, View } from 'react-native';
 import { ThemeProvider, DarkTheme, DefaultTheme } from 'expo-router/react-navigation';
 import { useAuthStore } from '../state/useAuthStore';
 
@@ -24,6 +24,15 @@ export default function RootLayout() {
     }
   }, [isAuthenticated, segments, isLoading]);
 
+  if (isLoading) {
+    const bgColor = colorScheme === 'dark' ? '#111827' : '#F3F4F6';
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: bgColor }}>
+        <ActivityIndicator size="large" color="#0D9488" />
+      </View>
+    );
+  }
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }}>
@@ -33,4 +42,5 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+
 

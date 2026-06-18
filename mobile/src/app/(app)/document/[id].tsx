@@ -21,12 +21,14 @@ import { documentService } from "../../../services/documents";
 import { shareService } from "../../../services/share";
 import { MedicalDocument, ShareLink } from "../../../types";
 import { useColorScheme } from "react-native";
+import { useAuthStore } from "../../../state/useAuthStore";
 
 export default function DocumentDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const [document, setDocument] = useState<MedicalDocument | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,13 +38,21 @@ export default function DocumentDetailsScreen() {
   const [showShareModal, setShowShareModal] = useState(false);
 
   const fetchDetails = async () => {
+    if (!id || id === "[id]" || !isAuthenticated) {
+      return;
+    }
     try {
+      setLoading(true);
       const doc = await documentService.getDocumentDetails(id as string);
       setDocument(doc);
     } catch (err: any) {
       console.error(err);
       Alert.alert("Error", "Failed to fetch document details.");
-      router.back();
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace("/(app)");
+      }
     } finally {
       setLoading(false);
     }
@@ -50,7 +60,8 @@ export default function DocumentDetailsScreen() {
 
   useEffect(() => {
     fetchDetails();
-  }, [id]);
+  }, [id, isAuthenticated]);
+
 
   const handleOpenOriginal = async () => {
     if (!document?.pre_signed_url) {
