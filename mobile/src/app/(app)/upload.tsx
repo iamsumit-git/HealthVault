@@ -192,6 +192,15 @@ export default function UploadScreen() {
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
           >
+            {/* Back Button */}
+            <TouchableOpacity
+              onPress={() => router.replace("/(app)")}
+              style={styles.backLink}
+            >
+              <Ionicons name="arrow-back" size={18} color="#0D9488" />
+              <ThemedText style={styles.backLinkText}>Back to Timeline</ThemedText>
+            </TouchableOpacity>
+
             {/* File Selector Cards */}
             <ThemedText style={styles.sectionTitle}>Add Medical Record</ThemedText>
             <ThemedText style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
@@ -398,6 +407,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.three,
     paddingBottom: Spacing.six,
+  },
+  backLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: Spacing.two,
+    gap: Spacing.one,
+  },
+  backLinkText: {
+    fontSize: 14,
+    color: "#0D9488",
+    fontWeight: "600",
   },
   sectionTitle: {
     fontSize: 20,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   StyleSheet,
   FlatList,
@@ -10,7 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import { ThemedText } from "../../components/themed-text";
@@ -56,9 +56,11 @@ export default function TimelineScreen() {
     }
   };
 
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchDocuments(documents.length === 0);
+    }, [documents.length])
+  );
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
