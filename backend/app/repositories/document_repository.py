@@ -25,6 +25,7 @@ class DocumentRepository:
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
+        db_obj.extracted_data = None
         return db_obj
 
     async def get_by_id(
@@ -44,7 +45,11 @@ class DocumentRepository:
         user_id: uuid.UUID,
         document_type: Optional[str] = None,
     ) -> List[MedicalDocument]:
-        query = select(MedicalDocument).where(MedicalDocument.user_id == user_id)
+        query = (
+            select(MedicalDocument)
+            .where(MedicalDocument.user_id == user_id)
+            .options(selectinload(MedicalDocument.extracted_data))
+        )
         if document_type:
             query = query.where(MedicalDocument.document_type == document_type)
 
